@@ -1,0 +1,13 @@
+services:
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/templates:/etc/nginx/templates:ro
+      - ${HOME}/sites/ct-site:/var/www/ct-site:ro
+    environment:
+      - CT_SITE_HOST=${CT_SITE_HOST}
