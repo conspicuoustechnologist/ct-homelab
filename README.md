@@ -2,7 +2,7 @@
 
 Homelab config for a Raspberry Pi 5 running nginx, Pi-hole, and Home Assistant in Docker Compose.
 
-Full walkthrough: [conspicuoustechnologist.com](https://www.conspicuoustechnologist.com)
+Full walkthrough: [Part 1 — Local Webserver](https://www.conspicuoustechnologist.com/2027/02/homelab-local-webserver/) (all parts at [conspicuoustechnologist.com](https://www.conspicuoustechnologist.com))
 
 ## Fresh install
 
@@ -13,14 +13,47 @@ curl -fsSL https://raw.githubusercontent.com/conspicuoustechnologist/ct-homelab/
 Then:
 
 ```bash
-nano ~/ct-homelab/.env      # fill in your values
+vi ~/ct-homelab/.env      # fill in your values
 cd ~/ct-homelab
 docker compose up -d
 ```
 
+## Configuration
+
+### bootstrap.sh
+
+Before running bootstrap, open it and check the config block at the top:
+
+```bash
+HOMELAB_DIR="${1:-$HOME/ct-homelab}"   # where the stack lives
+MAIN_SITE_DIR="$HOME/sites/ct-site"   # where site files are served from
+```
+
+Change these if you want the stack or site files somewhere other than the defaults. You can also pass a custom `HOMELAB_DIR` as an argument:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/conspicuoustechnologist/ct-homelab/main/bootstrap.sh) ~/homelab
+```
+
+### .env
+
+Copy `.env.example` to `.env` and fill in your values — this file is gitignored and never committed:
+
+```bash
+cp .env.example .env
+vi .env
+```
+
+```bash
+TZ=America/Denver
+HOSTNAME=raspberrypi
+DOMAIN=ct.home
+MAIN_SITE_HOST=conspicuoustechnologist.ct.home
+```
+
 ## Manual setup
 
-See the blog post for the full step-by-step walkthrough.
+See the [full walkthrough](https://www.conspicuoustechnologist.com/2027/02/homelab-local-webserver/) for step-by-step instructions.
 
 ## Structure
 
@@ -32,7 +65,7 @@ ct-homelab/
   nginx/
     Dockerfile              # FROM nginx:alpine — extend as needed
     templates/              # envsubst config templates
-      ct-site.conf.template
+      main-site.conf.template
 ```
 
 ## Deploying the site
@@ -40,5 +73,26 @@ ct-homelab/
 From your dev machine, after building:
 
 ```bash
-rsync -avz --delete public/ malphas:~/sites/ct-site/
+rsync -avz --delete your-output-dir/ $HOSTNAME:$MAIN_SITE_DIR/
+```
+
+For a one-command deploy, add this to your dev machine's `.zshrc` — adjust the site path, build command, and output directory for your setup:
+
+```bash
+deploy_pi() {
+  ( cd /path/to/your/site && \
+    your-build-command && \
+    rsync -avz --delete your-output-dir/ $HOSTNAME:$MAIN_SITE_DIR/ && \
+    ssh $HOSTNAME 'docker restart nginx' )
+}
+```
+
+Then `source ~/.zshrc` and `deploy_pi` builds, deploys, and restarts nginx in one shot.
+
+Build your site however you build it, then sync the output dir to `$MAIN_SITE_DIR` on the Pi.
+
+**Hugo:** to preview drafts or future-dated posts on the Pi, add `-D --buildFuture` to your build command — Hugo excludes both by default:
+
+```bash
+hugo build -D --buildFuture
 ```

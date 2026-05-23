@@ -8,6 +8,6 @@ services:
       - "443:443"
     volumes:
       - ./nginx/templates:/etc/nginx/templates:ro
-      - ${HOME}/sites/ct-site:/var/www/ct-site:ro
+      - ${MAIN_SITE_DIR}:/var/www/main:ro
     environment:
-      - CT_SITE_HOST=${CT_SITE_HOST}
+      - MAIN_SITE_HOST=${MAIN_SITE_HOST}

@@ -1,7 +1,7 @@
 server {
-    listen 80;
-    server_name ${CT_SITE_HOST};
-    root /var/www/ct-site;
+    listen 80 default_server;
+    server_name ${MAIN_SITE_HOST} _;
+    root /var/www/main;
     index index.html;
 
     location / {
