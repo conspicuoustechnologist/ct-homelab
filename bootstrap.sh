@@ -96,8 +96,8 @@ sudo usermod -aG docker $USER
 echo ""
 echo "==> Cloning ct-homelab..."
 if [ -d "$REPO_DIR/.git" ]; then
-    echo "    Repo already exists, pulling latest..."
-    git -C "$REPO_DIR" pull
+    echo "    Repo already exists, syncing to remote..."
+    git -C "$REPO_DIR" fetch origin && git -C "$REPO_DIR" reset --hard origin/main
 else
     git clone "$REPO_URL" "$REPO_DIR"
 fi
