@@ -47,7 +47,7 @@ TIMESTAMP=$(date +"%Y-%m-%d-%H%M%S")
 OUTFILE="$BACKUP_DIR/pihole-$TIMESTAMP.zip"
 
 echo "==> Downloading Teleporter backup..."
-HTTP_STATUS=$(curl -sf -o "$OUTFILE" -w "%{http_code}" \
+HTTP_STATUS=$(curl -s -o "$OUTFILE" -w "%{http_code}" \
     -H "Authorization: Bearer $SID" \
     "$PIHOLE_URL/api/teleporter")
 
