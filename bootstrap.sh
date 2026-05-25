@@ -22,8 +22,12 @@ echo "==> Installing zsh and git..."
 sudo apt install zsh git -y
 
 echo ""
-echo "==> Installing oh-my-zsh..."
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+if [ -d "$HOME/.oh-my-zsh" ]; then
+    echo "==> oh-my-zsh already installed, skipping."
+else
+    echo "==> Installing oh-my-zsh..."
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+fi
 
 echo ""
 echo "==> Writing ~/.zshrc.homelab..."
@@ -81,8 +85,12 @@ else
 fi
 
 echo ""
-echo "==> Installing Docker..."
-curl -fsSL https://get.docker.com | sh
+if command -v docker &>/dev/null; then
+    echo "==> Docker already installed, skipping."
+else
+    echo "==> Installing Docker..."
+    curl -fsSL https://get.docker.com | sh
+fi
 sudo usermod -aG docker $USER
 
 echo ""
