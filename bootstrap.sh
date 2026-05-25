@@ -184,20 +184,23 @@ if [ -n "$PIHOLE_BACKUP" ]; then
         done
 
         echo "==> Restoring Pi-hole backup..."
-        SID=$(curl -sf -X POST "http://$PIHOLE_HOST/api/auth" \
+        AUTH=$(curl -sf -X POST "http://$PIHOLE_HOST/api/auth" \
             -H "Content-Type: application/json" \
-            -d "{\"password\":\"$PIHOLE_WEBPASSWORD\"}" \
-            | grep -o '"sid":"[^"]*"' | cut -d'"' -f4)
+            -d "{\"password\":\"$PIHOLE_WEBPASSWORD\"}")
+        SID=$(echo "$AUTH" | grep -o '"sid":"[^"]*"' | cut -d'"' -f4)
+        CSRF=$(echo "$AUTH" | grep -o '"csrf":"[^"]*"' | cut -d'"' -f4)
 
         if [ -z "$SID" ]; then
             echo "    WARNING: Could not authenticate with Pi-hole — backup not restored."
         else
             HTTP_STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
                 -X POST "http://$PIHOLE_HOST/api/teleporter" \
-                -H "Authorization: Bearer $SID" \
+                -b "sid=$SID" \
+                -H "X-CSRF-TOKEN: $CSRF" \
                 -F "file=@$PIHOLE_BACKUP")
-            curl -sf -X DELETE "http://$PIHOLE_HOST/api/auth" \
-                -H "Authorization: Bearer $SID" > /dev/null
+            curl -s -X DELETE "http://$PIHOLE_HOST/api/auth" \
+                -b "sid=$SID" \
+                -H "X-CSRF-TOKEN: $CSRF" > /dev/null || true
             if [ "$HTTP_STATUS" = "200" ]; then
                 echo "    Backup restored from $PIHOLE_BACKUP"
             else
