@@ -25,7 +25,7 @@ services:
       - ./pihole/etc-dnsmasq.d:/etc/dnsmasq.d
     environment:
       - TZ=${TZ}
-      - WEBPASSWORD=${PIHOLE_WEBPASSWORD}
+      - FTLCONF_webserver_api_password=${PIHOLE_WEBPASSWORD}
       - FTLCONF_LOCAL_IPV4=${PI_IP}
       - FTLCONF_misc_etc_dnsmasq_d=true
       - FTLCONF_dns_listeningMode=ALL
