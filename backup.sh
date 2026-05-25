@@ -52,8 +52,8 @@ HTTP_STATUS=$(curl -s -o "$OUTFILE" -w "%{http_code}" \
     "$PIHOLE_URL/api/teleporter")
 
 echo "==> Deleting session..."
-curl -sf -X DELETE "$PIHOLE_URL/api/auth" \
-    -H "Authorization: Bearer $SID" > /dev/null
+curl -s -X DELETE "$PIHOLE_URL/api/auth" \
+    -H "Authorization: Bearer $SID" > /dev/null || true
 
 if [ "$HTTP_STATUS" != "200" ]; then
     echo "ERROR: Teleporter export failed (HTTP $HTTP_STATUS)." >&2
