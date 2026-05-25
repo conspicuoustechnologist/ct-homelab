@@ -18,6 +18,12 @@ cd ~/ct-homelab
 docker compose up -d
 ```
 
+## Update
+
+```bash
+cd ~/ct-homelab && git pull && docker compose down && docker compose up -d
+```
+
 ## Configuration
 
 ### bootstrap.sh
