@@ -5,9 +5,10 @@
 set -e
 
 # ---------------------------------------------------------------
-# Configuration — change these if you want different paths
-HOMELAB_DIR="${1:-$HOME/ct-homelab}"   # where the stack lives
-MAIN_SITE_DIR="$HOME/sites/ct-site"   # where site files are served from
+# Configuration — override with env vars:
+#   HOMELAB_DIR=~/my-homelab MAIN_SITE_DIR=~/my-sites bash <(curl ...)
+HOMELAB_DIR="${HOMELAB_DIR:-${1:-$HOME/ct-homelab}}"
+MAIN_SITE_DIR="${MAIN_SITE_DIR:-$HOME/sites/ct-site}"
 # ---------------------------------------------------------------
 
 REPO_URL="https://github.com/conspicuoustechnologist/ct-homelab.git"
