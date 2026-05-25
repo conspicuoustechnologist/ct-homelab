@@ -25,8 +25,6 @@ PIHOLE_HOST="${PIHOLE_HOST:-pihole.ct.home}"
 
 PIHOLE_WEBPASSWORD="${PIHOLE_WEBPASSWORD:-$(_env_get PIHOLE_WEBPASSWORD)}"
 
-PIHOLE_BACKUP="${PIHOLE_BACKUP:-$(_env_get PIHOLE_BACKUP)}"
-
 PI_IP="${PI_IP:-$(_env_get PI_IP)}"
 PI_IP="${PI_IP:-$(hostname -I | awk '{print $1}')}"
 
@@ -171,50 +169,12 @@ echo ""
 echo "==> Starting services..."
 docker compose up -d
 
-if [ -n "$PIHOLE_BACKUP" ]; then
-    if [ ! -f "$PIHOLE_BACKUP" ]; then
-        echo "    WARNING: PIHOLE_BACKUP set but file not found: $PIHOLE_BACKUP"
-    else
-        echo "==> Waiting for Pi-hole to be ready..."
-        for i in $(seq 1 30); do
-            if curl -sf "http://$PIHOLE_HOST/api/auth" -o /dev/null 2>/dev/null; then
-                break
-            fi
-            sleep 2
-        done
-
-        echo "==> Restoring Pi-hole backup..."
-        AUTH=$(curl -sf -X POST "http://$PIHOLE_HOST/api/auth" \
-            -H "Content-Type: application/json" \
-            -d "{\"password\":\"$PIHOLE_WEBPASSWORD\"}")
-        SID=$(echo "$AUTH" | grep -o '"sid":"[^"]*"' | cut -d'"' -f4)
-        CSRF=$(echo "$AUTH" | grep -o '"csrf":"[^"]*"' | cut -d'"' -f4)
-
-        if [ -z "$SID" ]; then
-            echo "    WARNING: Could not authenticate with Pi-hole — backup not restored."
-        else
-            HTTP_STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
-                -X POST "http://$PIHOLE_HOST/api/teleporter" \
-                -b "sid=$SID" \
-                -H "X-CSRF-TOKEN: $CSRF" \
-                -F "file=@$PIHOLE_BACKUP")
-            curl -s -X DELETE "http://$PIHOLE_HOST/api/auth" \
-                -b "sid=$SID" \
-                -H "X-CSRF-TOKEN: $CSRF" > /dev/null || true
-            if [ "$HTTP_STATUS" = "200" ]; then
-                echo "    Backup restored from $PIHOLE_BACKUP"
-            else
-                echo "    WARNING: Restore failed (HTTP $HTTP_STATUS)."
-            fi
-        fi
-    fi
-fi
-
 echo ""
 echo "================================================================"
 echo "  Done."
 echo ""
 echo "  To update:  cd $REPO_DIR && git pull && docker compose up -d"
 echo "  To backup:  bash $REPO_DIR/backup.sh"
+echo "  To restore: bash $REPO_DIR/restore_all.sh"
 echo "================================================================"
 echo ""
