@@ -49,6 +49,11 @@ TZ=America/Denver
 HOSTNAME=raspberrypi
 DOMAIN=ct.home
 MAIN_SITE_HOST=conspicuoustechnologist.ct.home
+
+# Pi-hole
+PI_IP=                 # your Pi's static IP (run: hostname -I)
+PIHOLE_WEBPASSWORD=    # admin UI password
+PIHOLE_HOST=pihole.ct.home
 ```
 
 ## Manual setup
@@ -66,6 +71,7 @@ ct-homelab/
     Dockerfile              # FROM nginx:alpine — extend as needed
     templates/              # envsubst config templates
       main-site.conf.template
+      pihole.conf.template
 ```
 
 ## Deploying the site
