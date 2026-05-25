@@ -59,16 +59,47 @@ PROMPT='$FG[015][$FG[010]%n@%m$FG[015]][$FG[244]%t$FG[015]][$FG[087]%~$FG[015]]$
 EOF
 
 echo ""
+echo "==> Checking port 53..."
+if sudo ss -tulpn | grep -qE ':53[^0-9]'; then
+    if sudo ss -tulpn | grep -E ':53[^0-9]' | grep -q systemd-resolved; then
+        echo "    systemd-resolved is on port 53 — disabling stub listener..."
+        sudo mkdir -p /etc/systemd/resolved.conf.d
+        sudo tee /etc/systemd/resolved.conf.d/no-stub.conf > /dev/null <<EOF
+[Resolve]
+DNSStubListener=no
+EOF
+        sudo systemctl restart systemd-resolved
+        echo "    Done. Port 53 is free."
+    else
+        echo "    WARNING: something else is on port 53:"
+        sudo ss -tulpn | grep -E ':53[^0-9]'
+        echo "    Pi-hole needs port 53. Stop that service before starting the stack."
+    fi
+else
+    echo "    Port 53 is free."
+fi
+
+echo ""
 echo "==> Installing Docker..."
 curl -fsSL https://get.docker.com | sh
 sudo usermod -aG docker $USER
 
 echo ""
 echo "==> Cloning ct-homelab..."
-git clone "$REPO_URL" "$REPO_DIR"
+if [ -d "$REPO_DIR/.git" ]; then
+    echo "    Repo already exists, pulling latest..."
+    git -C "$REPO_DIR" pull
+else
+    git clone "$REPO_URL" "$REPO_DIR"
+fi
 cd "$REPO_DIR"
-cp .env.example .env
-sed -i "s|MAIN_SITE_DIR=.*|MAIN_SITE_DIR=$MAIN_SITE_DIR|" .env
+
+if [ ! -f ".env" ]; then
+    cp .env.example .env
+    sed -i "s|MAIN_SITE_DIR=.*|MAIN_SITE_DIR=$MAIN_SITE_DIR|" .env
+else
+    echo "    .env already exists, skipping."
+fi
 
 echo ""
 echo "==> Creating site content directory..."
