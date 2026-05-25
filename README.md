@@ -22,7 +22,13 @@ docker compose up -d
 
 ### bootstrap.sh
 
-Defaults are `~/ct-homelab`, `~/sites/ct-site`, and `conspicuoustechnologist.ct.home`. Override with env vars:
+Bootstrap resolves configuration in this order:
+
+1. **Env vars passed at runtime** — highest priority
+2. **Existing `.env`** — if the file already exists, bootstrap reads values from it and skips writing it again
+3. **Built-in defaults**
+
+Override defaults with env vars at runtime:
 
 ```bash
 HOMELAB_DIR=~/my-homelab MAIN_SITE_DIR=~/my-sites MAIN_SITE_HOST=mysite.home bash <(curl -fsSL https://raw.githubusercontent.com/conspicuoustechnologist/ct-homelab/main/bootstrap.sh)
@@ -36,7 +42,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/conspicuoustechnologist/ct-h
 
 ### .env
 
-Copy `.env.example` to `.env` and fill in your values — this file is gitignored and never committed:
+Created automatically by bootstrap on first run. Edit it to change any values — bootstrap will not overwrite it on subsequent runs:
 
 ```bash
 cp .env.example .env
