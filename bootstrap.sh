@@ -88,6 +88,35 @@ if ! grep -q 'source ~/.zshrc.homelab' ~/.zshrc 2>/dev/null; then
 fi
 
 echo ""
+if [ -d "$HOME/.nvm" ]; then
+    echo "==> nvm already installed, skipping."
+else
+    echo "==> Installing nvm..."
+    NVM_VERSION=$(curl -s https://api.github.com/repos/nvm-sh/nvm/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+    export PROFILE=~/.zshrc
+    curl -o- "https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh" | bash
+fi
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+echo ""
+if command -v node &>/dev/null; then
+    echo "==> Node.js already installed, skipping."
+else
+    echo "==> Installing Node.js LTS..."
+    nvm install --lts
+fi
+
+echo ""
+if command -v claude &>/dev/null; then
+    echo "==> Claude Code already installed, skipping."
+else
+    echo "==> Installing Claude Code..."
+    npm install -g @anthropic-ai/claude-code
+fi
+
+echo ""
 echo "==> Checking port 53..."
 if sudo ss -tulpn | grep -qE ':53[^0-9]'; then
     if sudo ss -tulpn | grep -E ':53[^0-9]' | grep -q systemd-resolved; then
