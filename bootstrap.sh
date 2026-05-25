@@ -5,10 +5,19 @@
 set -e
 
 # ---------------------------------------------------------------
-# Configuration — override with env vars:
+# Configuration — priority: env var > existing .env > auto-detect
 #   HOMELAB_DIR=~/my-homelab MAIN_SITE_HOST=mysite.home bash <(curl ...)
 HOMELAB_DIR="${HOMELAB_DIR:-${1:-$HOME/ct-homelab}}"
+
+_env_get() {
+    local key="$1"
+    [ -f "$HOMELAB_DIR/.env" ] && grep -E "^${key}=" "$HOMELAB_DIR/.env" | cut -d= -f2 || true
+}
+
+MAIN_SITE_DIR="${MAIN_SITE_DIR:-$(_env_get MAIN_SITE_DIR)}"
 MAIN_SITE_DIR="${MAIN_SITE_DIR:-$HOME/sites/ct-site}"
+
+MAIN_SITE_HOST="${MAIN_SITE_HOST:-$(_env_get MAIN_SITE_HOST)}"
 MAIN_SITE_HOST="${MAIN_SITE_HOST:-conspicuoustechnologist.ct.home}"
 # ---------------------------------------------------------------
 
