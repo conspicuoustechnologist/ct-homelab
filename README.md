@@ -10,12 +10,16 @@ Full walkthrough: [Part 1 — Local Webserver](https://www.conspicuoustechnologi
 curl -fsSL https://raw.githubusercontent.com/conspicuoustechnologist/ct-homelab/main/bootstrap.sh | sh
 ```
 
-Then:
+Bootstrap will pause and ask you to review `.env` before starting the stack. Set `NO_PROMPT=1` to skip:
 
 ```bash
-vi ~/ct-homelab/.env      # fill in your values
-cd ~/ct-homelab
-docker compose up -d
+NO_PROMPT=1 bash <(curl -fsSL https://raw.githubusercontent.com/conspicuoustechnologist/ct-homelab/main/bootstrap.sh)
+```
+
+To restore a Pi-hole backup automatically:
+
+```bash
+PIHOLE_BACKUP=/path/to/pihole-backup.zip bash <(curl -fsSL https://raw.githubusercontent.com/conspicuoustechnologist/ct-homelab/main/bootstrap.sh)
 ```
 
 ## Update
@@ -61,9 +65,10 @@ HOSTNAME=raspberrypi
 DOMAIN=ct.home
 MAIN_SITE_HOST=conspicuoustechnologist.ct.home
 
-# Pi-hole
-PI_IP=                 # your Pi's static IP (run: hostname -I)
-PIHOLE_WEBPASSWORD=    # admin UI password
+# PI_IP: your Pi's static IP (run: hostname -I)
+PI_IP=
+# PIHOLE_WEBPASSWORD: admin UI password
+PIHOLE_WEBPASSWORD=
 PIHOLE_HOST=pihole.ct.home
 ```
 
@@ -76,6 +81,7 @@ See the [full walkthrough](https://www.conspicuoustechnologist.com/2027/02/homel
 ```
 ct-homelab/
   bootstrap.sh              # fresh Pi setup — run once
+  backup.sh                 # Pi-hole Teleporter backup
   docker-compose.yml        # all services
   .env.example              # copy to .env, fill in your values
   nginx/
