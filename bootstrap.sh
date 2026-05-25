@@ -26,13 +26,12 @@ echo "==> Installing oh-my-zsh..."
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
 echo ""
-echo "==> Writing .zshrc..."
-truncate -s 0 ~/.zshrc
-cat > ~/.zshrc << 'EOF'
-export ZSH="$HOME/.oh-my-zsh"
+echo "==> Writing ~/.zshrc.homelab..."
+cat > ~/.zshrc.homelab << EOF
+export ZSH="\$HOME/.oh-my-zsh"
 ZSH_THEME=""
 plugins=(git docker)
-source $ZSH/oh-my-zsh.sh
+source \$ZSH/oh-my-zsh.sh
 
 # history
 unsetopt share_history
@@ -49,14 +48,16 @@ alias dps='docker ps'
 alias dimg='docker images'
 
 # homelab
-EOF
-printf 'export HOMELAB_DIR=%s\n' "$REPO_DIR" >> ~/.zshrc
-printf 'export MAIN_SITE_DIR=%s\n' "$MAIN_SITE_DIR" >> ~/.zshrc
-cat >> ~/.zshrc << 'EOF'
+export HOMELAB_DIR=$REPO_DIR
+export MAIN_SITE_DIR=$MAIN_SITE_DIR
 
 # prompt: [user@host][time][~/path](git)->
-PROMPT='$FG[015][$FG[010]%n@%m$FG[015]][$FG[244]%t$FG[015]][$FG[087]%~$FG[015]]$FG[010]$(git_prompt_info)$FG[015]-> '
+PROMPT='\$FG[015][\$FG[010]%n@%m\$FG[015]][\$FG[244]%t\$FG[015]][\$FG[087]%~\$FG[015]]\$FG[010]\$(git_prompt_info)\$FG[015]-> '
 EOF
+
+if ! grep -q 'source ~/.zshrc.homelab' ~/.zshrc 2>/dev/null; then
+    echo 'source ~/.zshrc.homelab' >> ~/.zshrc
+fi
 
 echo ""
 echo "==> Checking port 53..."
