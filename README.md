@@ -22,14 +22,13 @@ docker compose up -d
 
 ### bootstrap.sh
 
-Before running bootstrap, open it and check the config block at the top:
+Defaults are `~/ct-homelab` and `~/sites/ct-site`. Override with env vars:
 
 ```bash
-HOMELAB_DIR="${1:-$HOME/ct-homelab}"   # where the stack lives
-MAIN_SITE_DIR="$HOME/sites/ct-site"   # where site files are served from
+HOMELAB_DIR=~/my-homelab MAIN_SITE_DIR=~/my-sites bash <(curl -fsSL https://raw.githubusercontent.com/conspicuoustechnologist/ct-homelab/main/bootstrap.sh)
 ```
 
-Change these if you want the stack or site files somewhere other than the defaults. You can also pass a custom `HOMELAB_DIR` as an argument:
+You can also pass `HOMELAB_DIR` as a positional argument:
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/conspicuoustechnologist/ct-homelab/main/bootstrap.sh) ~/homelab
