@@ -25,6 +25,8 @@ PIHOLE_HOST="${PIHOLE_HOST:-pihole.ct.home}"
 
 PIHOLE_WEBPASSWORD="${PIHOLE_WEBPASSWORD:-$(_env_get PIHOLE_WEBPASSWORD)}"
 
+PIHOLE_BACKUP="${PIHOLE_BACKUP:-$(_env_get PIHOLE_BACKUP)}"
+
 PI_IP="${PI_IP:-$(_env_get PI_IP)}"
 PI_IP="${PI_IP:-$(hostname -I | awk '{print $1}')}"
 
@@ -32,7 +34,7 @@ MAIN_SITE_IP="${MAIN_SITE_IP:-$(_env_get MAIN_SITE_IP)}"
 MAIN_SITE_IP="${MAIN_SITE_IP:-$PI_IP}"
 # ---------------------------------------------------------------
 
-REPO_URL="https://github.com/conspicuoustechnologist/ct-homelab.git"
+REPO_URL="${REPO_URL:-https://github.com/conspicuoustechnologist/ct-homelab.git}"
 REPO_DIR="$HOMELAB_DIR"
 
 echo ""
@@ -155,12 +157,50 @@ echo "==> Creating site content directory..."
 mkdir -p "$MAIN_SITE_DIR"
 
 echo ""
-echo "================================================================"
-echo "  Done. Next steps:"
+echo "==> Starting services..."
+docker compose up -d
+
+if [ -n "$PIHOLE_BACKUP" ]; then
+    if [ ! -f "$PIHOLE_BACKUP" ]; then
+        echo "    WARNING: PIHOLE_BACKUP set but file not found: $PIHOLE_BACKUP"
+    else
+        echo "==> Waiting for Pi-hole to be ready..."
+        for i in $(seq 1 30); do
+            if curl -sf "http://$PIHOLE_HOST/api/auth" -o /dev/null 2>/dev/null; then
+                break
+            fi
+            sleep 2
+        done
+
+        echo "==> Restoring Pi-hole backup..."
+        SID=$(curl -sf -X POST "http://$PIHOLE_HOST/api/auth" \
+            -H "Content-Type: application/json" \
+            -d "{\"password\":\"$PIHOLE_WEBPASSWORD\"}" \
+            | grep -o '"sid":"[^"]*"' | cut -d'"' -f4)
+
+        if [ -z "$SID" ]; then
+            echo "    WARNING: Could not authenticate with Pi-hole — backup not restored."
+        else
+            HTTP_STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
+                -X POST "http://$PIHOLE_HOST/api/teleporter" \
+                -H "Authorization: Bearer $SID" \
+                -F "file=@$PIHOLE_BACKUP")
+            curl -sf -X DELETE "http://$PIHOLE_HOST/api/auth" \
+                -H "Authorization: Bearer $SID" > /dev/null
+            if [ "$HTTP_STATUS" = "200" ]; then
+                echo "    Backup restored from $PIHOLE_BACKUP"
+            else
+                echo "    WARNING: Restore failed (HTTP $HTTP_STATUS)."
+            fi
+        fi
+    fi
+fi
+
 echo ""
-echo "  1. Edit your config:  vi $REPO_DIR/.env"
-echo "  2. Activate docker group (or log out and back in):"
-echo "     newgrp docker"
-echo "  3. Start/restart services: cd $REPO_DIR && docker compose up -d"
+echo "================================================================"
+echo "  Done."
+echo ""
+echo "  To update:  cd $REPO_DIR && git pull && docker compose up -d"
+echo "  To backup:  bash $REPO_DIR/backup.sh"
 echo "================================================================"
 echo ""
