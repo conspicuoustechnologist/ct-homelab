@@ -151,16 +151,6 @@ if ! grep -q "$MAIN_SITE_HOST" "$LOCAL_DNS" 2>/dev/null; then
 fi
 
 echo ""
-if [ -n "$PIHOLE_WEBPASSWORD" ]; then
-    if docker ps --format '{{.Names}}' 2>/dev/null | grep -q '^pihole$'; then
-        echo "==> Setting Pi-hole password..."
-        docker exec pihole pihole setpassword "$PIHOLE_WEBPASSWORD"
-    else
-        echo "==> Pi-hole not running — password will be set from .env on first start."
-    fi
-fi
-
-echo ""
 echo "==> Creating site content directory..."
 mkdir -p "$MAIN_SITE_DIR"
 
