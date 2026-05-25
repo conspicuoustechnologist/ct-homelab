@@ -1,6 +1,6 @@
 server {
-    listen 80;
-    server_name ${PIHOLE_HOST};
+    listen 80 default_server;
+    server_name ${PIHOLE_HOST} _;
 
     location / {
         proxy_pass http://pihole:80;
