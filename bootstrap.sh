@@ -141,6 +141,17 @@ else
     echo "    .env already exists, skipping."
 fi
 
+if [ "${NO_PROMPT:-0}" != "1" ]; then
+    echo ""
+    echo "================================================================"
+    echo "  Review your config before continuing:"
+    echo "  vi $REPO_DIR/.env"
+    echo ""
+    echo "  Press Enter when done (or set NO_PROMPT=1 to skip this)."
+    echo "================================================================"
+    read -r
+fi
+
 echo ""
 echo "==> Writing Pi-hole local DNS records..."
 mkdir -p ./pihole/etc-dnsmasq.d
