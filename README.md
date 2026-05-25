@@ -22,10 +22,10 @@ docker compose up -d
 
 ### bootstrap.sh
 
-Defaults are `~/ct-homelab` and `~/sites/ct-site`. Override with env vars:
+Defaults are `~/ct-homelab`, `~/sites/ct-site`, and `conspicuoustechnologist.ct.home`. Override with env vars:
 
 ```bash
-HOMELAB_DIR=~/my-homelab MAIN_SITE_DIR=~/my-sites bash <(curl -fsSL https://raw.githubusercontent.com/conspicuoustechnologist/ct-homelab/main/bootstrap.sh)
+HOMELAB_DIR=~/my-homelab MAIN_SITE_DIR=~/my-sites MAIN_SITE_HOST=mysite.home bash <(curl -fsSL https://raw.githubusercontent.com/conspicuoustechnologist/ct-homelab/main/bootstrap.sh)
 ```
 
 You can also pass `HOMELAB_DIR` as a positional argument:
