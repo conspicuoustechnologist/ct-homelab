@@ -27,6 +27,9 @@ PIHOLE_WEBPASSWORD="${PIHOLE_WEBPASSWORD:-$(_env_get PIHOLE_WEBPASSWORD)}"
 
 PI_IP="${PI_IP:-$(_env_get PI_IP)}"
 PI_IP="${PI_IP:-$(hostname -I | awk '{print $1}')}"
+
+MAIN_SITE_IP="${MAIN_SITE_IP:-$(_env_get MAIN_SITE_IP)}"
+MAIN_SITE_IP="${MAIN_SITE_IP:-$PI_IP}"
 # ---------------------------------------------------------------
 
 REPO_URL="https://github.com/conspicuoustechnologist/ct-homelab.git"
@@ -127,6 +130,7 @@ if [ ! -f ".env" ]; then
     sed -i "s|MAIN_SITE_DIR=.*|MAIN_SITE_DIR=$MAIN_SITE_DIR|" .env
     sed -i "s|MAIN_SITE_HOST=.*|MAIN_SITE_HOST=$MAIN_SITE_HOST|" .env
     sed -i "s|PI_IP=.*|PI_IP=$PI_IP|" .env
+    sed -i "s|MAIN_SITE_IP=.*|MAIN_SITE_IP=$MAIN_SITE_IP|" .env
     sed -i "s|PIHOLE_HOST=.*|PIHOLE_HOST=$PIHOLE_HOST|" .env
     if [ -n "$PIHOLE_WEBPASSWORD" ]; then
         sed -i "s|PIHOLE_WEBPASSWORD=.*|PIHOLE_WEBPASSWORD=$PIHOLE_WEBPASSWORD|" .env
@@ -141,6 +145,9 @@ mkdir -p ./pihole/etc-pihole
 CUSTOM_LIST=./pihole/etc-pihole/custom.list
 if ! grep -q "$PIHOLE_HOST" "$CUSTOM_LIST" 2>/dev/null; then
     echo "$PI_IP $PIHOLE_HOST" >> "$CUSTOM_LIST"
+fi
+if ! grep -q "$MAIN_SITE_HOST" "$CUSTOM_LIST" 2>/dev/null; then
+    echo "$MAIN_SITE_IP $MAIN_SITE_HOST" >> "$CUSTOM_LIST"
 fi
 
 echo ""

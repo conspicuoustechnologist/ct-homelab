@@ -26,7 +26,7 @@ Bootstrap resolves configuration in this order:
 
 1. **Env vars passed at runtime** — highest priority
 2. **Existing `.env`** — if the file already exists, bootstrap reads values from it and skips writing it again
-3. **Auto-detected or built-in defaults** — `PI_IP` falls back to `hostname -I`
+3. **Auto-detected or built-in defaults** — `PI_IP` falls back to `hostname -I`; `MAIN_SITE_IP` defaults to `PI_IP`
 
 Override defaults with env vars at runtime:
 
