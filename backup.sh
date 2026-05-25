@@ -33,10 +33,12 @@ fi
 mkdir -p "$BACKUP_DIR"
 
 echo "==> Authenticating with Pi-hole..."
-SID=$(curl -sf -X POST "$PIHOLE_URL/api/auth" \
+AUTH=$(curl -sf -X POST "$PIHOLE_URL/api/auth" \
     -H "Content-Type: application/json" \
-    -d "{\"password\":\"$PIHOLE_WEBPASSWORD\"}" \
-    | grep -o '"sid":"[^"]*"' | cut -d'"' -f4)
+    -d "{\"password\":\"$PIHOLE_WEBPASSWORD\"}")
+
+SID=$(echo "$AUTH" | grep -o '"sid":"[^"]*"' | cut -d'"' -f4)
+CSRF=$(echo "$AUTH" | grep -o '"csrf":"[^"]*"' | cut -d'"' -f4)
 
 if [ -z "$SID" ]; then
     echo "ERROR: Failed to authenticate with Pi-hole. Check PIHOLE_WEBPASSWORD." >&2
@@ -48,12 +50,14 @@ OUTFILE="$BACKUP_DIR/pihole-$TIMESTAMP.zip"
 
 echo "==> Downloading Teleporter backup..."
 HTTP_STATUS=$(curl -s -o "$OUTFILE" -w "%{http_code}" \
-    -H "Authorization: Bearer $SID" \
+    -b "sid=$SID" \
+    -H "X-CSRF-TOKEN: $CSRF" \
     "$PIHOLE_URL/api/teleporter")
 
 echo "==> Deleting session..."
 curl -s -X DELETE "$PIHOLE_URL/api/auth" \
-    -H "Authorization: Bearer $SID" > /dev/null || true
+    -b "sid=$SID" \
+    -H "X-CSRF-TOKEN: $CSRF" > /dev/null || true
 
 if [ "$HTTP_STATUS" != "200" ]; then
     echo "ERROR: Teleporter export failed (HTTP $HTTP_STATUS)." >&2
