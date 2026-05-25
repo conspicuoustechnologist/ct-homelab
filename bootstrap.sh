@@ -6,9 +6,10 @@ set -e
 
 # ---------------------------------------------------------------
 # Configuration — override with env vars:
-#   HOMELAB_DIR=~/my-homelab MAIN_SITE_DIR=~/my-sites bash <(curl ...)
+#   HOMELAB_DIR=~/my-homelab MAIN_SITE_HOST=mysite.home bash <(curl ...)
 HOMELAB_DIR="${HOMELAB_DIR:-${1:-$HOME/ct-homelab}}"
 MAIN_SITE_DIR="${MAIN_SITE_DIR:-$HOME/sites/ct-site}"
+MAIN_SITE_HOST="${MAIN_SITE_HOST:-conspicuoustechnologist.ct.home}"
 # ---------------------------------------------------------------
 
 REPO_URL="https://github.com/conspicuoustechnologist/ct-homelab.git"
@@ -107,6 +108,7 @@ cd "$REPO_DIR"
 if [ ! -f ".env" ]; then
     cp .env.example .env
     sed -i "s|MAIN_SITE_DIR=.*|MAIN_SITE_DIR=$MAIN_SITE_DIR|" .env
+    sed -i "s|MAIN_SITE_HOST=.*|MAIN_SITE_HOST=$MAIN_SITE_HOST|" .env
 else
     echo "    .env already exists, skipping."
 fi
