@@ -1,6 +1,6 @@
 # ct-homelab
 
-Homelab config for a Raspberry Pi 5 running nginx, Pi-hole, and Home Assistant in Docker Compose.
+Homelab config for a Raspberry Pi 5 running nginx and Pi-hole in Docker Compose, with Claude Code as a persistent SSH-accessible dev environment.
 
 Full walkthrough: [Part 1 — Local Webserver](https://www.conspicuoustechnologist.com/2027/02/homelab-local-webserver/) (all parts at [conspicuoustechnologist.com](https://www.conspicuoustechnologist.com))
 
@@ -16,11 +16,22 @@ Bootstrap will pause and ask you to review `.env` before starting the stack. Set
 NO_PROMPT=1 bash <(curl -fsSL https://raw.githubusercontent.com/conspicuoustechnologist/ct-homelab/main/bootstrap.sh)
 ```
 
-To restore a Pi-hole backup automatically:
+## Restore
+
+After bootstrap, run the restore scripts to bring back your Pi-hole config and Claude config:
 
 ```bash
-PIHOLE_BACKUP=/path/to/pihole-backup.zip bash <(curl -fsSL https://raw.githubusercontent.com/conspicuoustechnologist/ct-homelab/main/bootstrap.sh)
+bash ~/ct-homelab/restore_all.sh
 ```
+
+Or run them individually:
+
+```bash
+bash ~/ct-homelab/restore_pihole.sh   # Pi-hole Teleporter backup
+bash ~/ct-homelab/restore_claude.sh   # Claude config from GitHub
+```
+
+Both scripts prompt interactively — nothing ends up in shell history.
 
 ## Update
 
@@ -82,6 +93,9 @@ See the [full walkthrough](https://www.conspicuoustechnologist.com/2027/02/homel
 ct-homelab/
   bootstrap.sh              # fresh Pi setup — run once
   backup.sh                 # Pi-hole Teleporter backup
+  restore_all.sh            # restore Pi-hole + Claude config (runs both below)
+  restore_pihole.sh         # restore Pi-hole from Teleporter backup
+  restore_claude.sh         # restore ~/.claude config from GitHub
   docker-compose.yml        # all services
   .env.example              # copy to .env, fill in your values
   nginx/
