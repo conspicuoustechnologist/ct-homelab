@@ -11,7 +11,7 @@ HOMELAB_DIR="${HOMELAB_DIR:-${1:-$HOME/ct-homelab}}"
 
 _env_get() {
     local key="$1"
-    [ -f "$HOMELAB_DIR/.env" ] && grep -E "^${key}=" "$HOMELAB_DIR/.env" | cut -d= -f2 || true
+    [ -f "$HOMELAB_DIR/.env" ] && grep -E "^${key}=" "$HOMELAB_DIR/.env" | cut -d= -f2 | sed 's/[[:space:]]*#.*//' | xargs || true
 }
 
 MAIN_SITE_DIR="${MAIN_SITE_DIR:-$(_env_get MAIN_SITE_DIR)}"
@@ -141,13 +141,13 @@ fi
 
 echo ""
 echo "==> Writing Pi-hole local DNS records..."
-mkdir -p ./pihole/etc-pihole
-CUSTOM_LIST=./pihole/etc-pihole/custom.list
-if ! grep -q "$PIHOLE_HOST" "$CUSTOM_LIST" 2>/dev/null; then
-    echo "$PI_IP $PIHOLE_HOST" >> "$CUSTOM_LIST"
+mkdir -p ./pihole/etc-dnsmasq.d
+LOCAL_DNS=./pihole/etc-dnsmasq.d/01-local-dns.conf
+if ! grep -q "$PIHOLE_HOST" "$LOCAL_DNS" 2>/dev/null; then
+    echo "address=/$PIHOLE_HOST/$PI_IP" >> "$LOCAL_DNS"
 fi
-if ! grep -q "$MAIN_SITE_HOST" "$CUSTOM_LIST" 2>/dev/null; then
-    echo "$MAIN_SITE_IP $MAIN_SITE_HOST" >> "$CUSTOM_LIST"
+if ! grep -q "$MAIN_SITE_HOST" "$LOCAL_DNS" 2>/dev/null; then
+    echo "address=/$MAIN_SITE_HOST/$MAIN_SITE_IP" >> "$LOCAL_DNS"
 fi
 
 echo ""
