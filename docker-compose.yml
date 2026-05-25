@@ -28,5 +28,6 @@ services:
       - WEBPASSWORD=${PIHOLE_WEBPASSWORD}
       - FTLCONF_LOCAL_IPV4=${PI_IP}
       - FTLCONF_misc_etc_dnsmasq_d=true
+      - FTLCONF_dns_listeningMode=ALL
     cap_add:
       - NET_ADMIN
