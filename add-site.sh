@@ -22,10 +22,16 @@ if [ -z "$SITE_NAME" ]; then
     read -r -p "Site name (short slug, e.g. pelander): " SITE_NAME
 fi
 if [ -z "$SITE_HOST" ]; then
-    read -r -p "Local hostname (e.g. pelander.ct.home): " SITE_HOST
+    DOMAIN="${DOMAIN:-$(_env_get DOMAIN)}"
+    DOMAIN="${DOMAIN:-ct.home}"
+    SITE_HOST_DEFAULT="${SITE_NAME}.${DOMAIN}"
+    read -r -p "Local hostname [$SITE_HOST_DEFAULT]: " SITE_HOST
+    SITE_HOST="${SITE_HOST:-$SITE_HOST_DEFAULT}"
 fi
 if [ -z "$SITE_DIR" ]; then
-    read -r -p "Site files directory (e.g. /home/jd/sites/pelander): " SITE_DIR
+    SITE_DIR_DEFAULT="$HOME/sites/$SITE_NAME"
+    read -r -p "Site files directory [$SITE_DIR_DEFAULT]: " SITE_DIR
+    SITE_DIR="${SITE_DIR:-$SITE_DIR_DEFAULT}"
 fi
 
 if [ -z "$SITE_NAME" ] || [ -z "$SITE_HOST" ] || [ -z "$SITE_DIR" ]; then
