@@ -115,6 +115,14 @@ else
 fi
 
 echo ""
+if command -v tmux &>/dev/null; then
+    echo "==> tmux already installed, skipping."
+else
+    echo "==> Installing tmux..."
+    sudo apt install -y tmux
+fi
+
+echo ""
 echo "==> Checking port 53..."
 if sudo ss -tulpn | grep -qE ':53[^0-9]'; then
     if sudo ss -tulpn | grep -E ':53[^0-9]' | grep -q systemd-resolved; then
