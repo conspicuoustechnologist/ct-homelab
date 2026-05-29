@@ -68,6 +68,10 @@ fi
 
 echo "    Saved: $OUTFILE"
 
+echo "==> Backing up .env..."
+cp "$HOMELAB_DIR/.env" "$BACKUP_DIR/.env.backup"
+echo "    Saved: $BACKUP_DIR/.env.backup"
+
 echo "==> Pruning old backups (keeping last $KEEP_BACKUPS)..."
 ls -t "$BACKUP_DIR"/pihole-*.zip 2>/dev/null | tail -n +$((KEEP_BACKUPS + 1)) | xargs -r rm --
 echo "    Done."
