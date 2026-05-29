@@ -4,7 +4,7 @@
 # creates the content directory, and adds a Pi-hole DNS record.
 #
 # Usage: bash add-site.sh <name> <host> <dir>
-# Example: bash add-site.sh pelander pelander.ct.home /home/jd/sites/pelander
+# Example: bash add-site.sh mysite mysite.ct.home /home/jd/sites/mysite
 set -e
 
 HOMELAB_DIR="${HOMELAB_DIR:-$HOME/ct-homelab}"
@@ -19,7 +19,7 @@ SITE_HOST="${2:-}"
 SITE_DIR="${3:-}"
 
 if [ -z "$SITE_NAME" ]; then
-    read -r -p "Site name (short slug): " SITE_NAME
+    read -r -p "Site name (one word, no spaces): " SITE_NAME
 fi
 if [ -z "$SITE_HOST" ]; then
     DOMAIN="$(_env_get DOMAIN)"
