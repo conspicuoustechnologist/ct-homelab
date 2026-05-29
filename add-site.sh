@@ -144,6 +144,8 @@ read -r -p "Clone a git repository into $SITE_DIR? [y/N] " CLONE_REPO
 if [[ "$CLONE_REPO" =~ ^[Yy]$ ]]; then
     read -r -p "Repository URL: " REPO_URL
     if [ -n "$REPO_URL" ]; then
+        # convert GitHub HTTPS URLs to SSH so private repos work
+        REPO_URL=$(echo "$REPO_URL" | sed 's|https://github.com/|git@github.com:|' | sed 's|\.git/*$||').git
         git clone "$REPO_URL" "$SITE_DIR"
         echo "==> Cloned $REPO_URL into $SITE_DIR"
     else
