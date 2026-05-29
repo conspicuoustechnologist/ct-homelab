@@ -22,7 +22,7 @@ if [ -z "$SITE_NAME" ]; then
     read -r -p "Site name (short slug, e.g. pelander): " SITE_NAME
 fi
 if [ -z "$SITE_HOST" ]; then
-    DOMAIN="${DOMAIN:-$(_env_get DOMAIN)}"
+    DOMAIN="$(_env_get DOMAIN)"
     DOMAIN="${DOMAIN:-ct.home}"
     SITE_HOST_DEFAULT="${SITE_NAME}.${DOMAIN}"
     read -r -p "Local hostname [$SITE_HOST_DEFAULT]: " SITE_HOST
