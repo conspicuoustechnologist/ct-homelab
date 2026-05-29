@@ -19,7 +19,7 @@ SITE_HOST="${2:-}"
 SITE_DIR="${3:-}"
 
 if [ -z "$SITE_NAME" ]; then
-    read -r -p "Site name (short slug, e.g. pelander): " SITE_NAME
+    read -r -p "Site name (short slug): " SITE_NAME
 fi
 if [ -z "$SITE_HOST" ]; then
     DOMAIN="$(_env_get DOMAIN)"
