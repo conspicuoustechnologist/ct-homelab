@@ -1,3 +1,7 @@
 .env
+docker-compose.override.yml
 nginx/certs/
+nginx/templates/*.conf.template
+!nginx/templates/main-site.conf.template
+!nginx/templates/pihole.conf.template
 backups/

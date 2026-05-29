@@ -45,7 +45,7 @@ VAR_PREFIX="${SITE_NAME^^}"
 VAR_PREFIX="${VAR_PREFIX//-/_}"
 
 TEMPLATE="$HOMELAB_DIR/nginx/templates/${SITE_NAME}.conf.template"
-COMPOSE="$HOMELAB_DIR/docker-compose.yml"
+COMPOSE="$HOMELAB_DIR/docker-compose.override.yml"
 ENV_FILE="$HOMELAB_DIR/.env"
 LOCAL_DNS="$HOMELAB_DIR/pihole/etc-dnsmasq.d/01-local-dns.conf"
 
@@ -74,40 +74,50 @@ server {
 EOF
 echo "==> Created: $TEMPLATE"
 
-# 2. docker-compose.yml -- insert after last *_DIR volume and last *_HOST env var
+# 2. docker-compose.override.yml -- create or append site entries
 python3 - << PYEOF
-import sys
+import sys, os
 
-compose_path = "$COMPOSE"
+override_path = "$COMPOSE"
 site_name = "$SITE_NAME"
 var_prefix = "$VAR_PREFIX"
-
-with open(compose_path) as f:
-    lines = f.readlines()
-
-last_vol = last_env = -1
-for i, line in enumerate(lines):
-    s = line.strip()
-    if s.startswith('- \${') and ':/var/www/' in s:
-        last_vol = i
-    if s.startswith('- ') and '_HOST=' in s:
-        last_env = i
-
-if last_vol == -1 or last_env == -1:
-    print("ERROR: could not find insertion points in docker-compose.yml", file=sys.stderr)
-    sys.exit(1)
 
 indent = '      '
 new_vol = indent + "- \${" + var_prefix + "_DIR}:/var/www/" + site_name + ":ro\n"
 new_env = indent + "- " + var_prefix + "_HOST=\${" + var_prefix + "_HOST}\n"
 
-lines.insert(last_env + 1, new_env)
-lines.insert(last_vol + 1, new_vol)
+if not os.path.exists(override_path):
+    content = (
+        "services:\n"
+        "  nginx:\n"
+        "    volumes:\n" + new_vol +
+        "    environment:\n" + new_env
+    )
+    with open(override_path, 'w') as f:
+        f.write(content)
+    print("==> Created: " + override_path)
+else:
+    with open(override_path) as f:
+        lines = f.readlines()
 
-with open(compose_path, 'w') as f:
-    f.writelines(lines)
+    last_vol = last_env = -1
+    for i, line in enumerate(lines):
+        s = line.strip()
+        if s.startswith('- \${') and ':/var/www/' in s:
+            last_vol = i
+        if s.startswith('- ') and '_HOST=' in s:
+            last_env = i
 
-print("==> Updated: " + compose_path)
+    if last_vol == -1 or last_env == -1:
+        print("ERROR: could not find insertion points in docker-compose.override.yml", file=sys.stderr)
+        sys.exit(1)
+
+    lines.insert(last_env + 1, new_env)
+    lines.insert(last_vol + 1, new_vol)
+
+    with open(override_path, 'w') as f:
+        f.writelines(lines)
+    print("==> Updated: " + override_path)
 PYEOF
 
 # 3. .env

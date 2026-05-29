@@ -24,7 +24,7 @@ VAR_PREFIX="${SITE_NAME^^}"
 VAR_PREFIX="${VAR_PREFIX//-/_}"
 
 TEMPLATE="$HOMELAB_DIR/nginx/templates/${SITE_NAME}.conf.template"
-COMPOSE="$HOMELAB_DIR/docker-compose.yml"
+COMPOSE="$HOMELAB_DIR/docker-compose.override.yml"
 ENV_FILE="$HOMELAB_DIR/.env"
 LOCAL_DNS="$HOMELAB_DIR/pihole/etc-dnsmasq.d/01-local-dns.conf"
 
@@ -77,7 +77,7 @@ filtered = [
 ]
 
 if len(filtered) == len(lines):
-    print("==> No entries found in docker-compose.yml, skipping")
+    print("==> No entries found in docker-compose.override.yml, skipping")
 else:
     with open(compose_path, 'w') as f:
         f.writelines(filtered)
