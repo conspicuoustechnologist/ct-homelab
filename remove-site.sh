@@ -95,7 +95,7 @@ fi
 # 4. Pi-hole DNS record
 if [ -f "$LOCAL_DNS" ] && [ -n "$SITE_HOST" ]; then
     if grep -q "$SITE_HOST" "$LOCAL_DNS"; then
-        sed -i "/\/$SITE_HOST\//d" "$LOCAL_DNS"
+        sudo sed -i "/\/$SITE_HOST\//d" "$LOCAL_DNS"
         echo "==> Removed DNS record: $SITE_HOST"
         if docker ps --format '{{.Names}}' | grep -q '^pihole$'; then
             docker restart pihole > /dev/null
