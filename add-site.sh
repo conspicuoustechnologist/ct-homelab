@@ -154,12 +154,13 @@ if [[ "$CLONE_REPO" =~ ^[Yy]$ ]]; then
 fi
 
 echo ""
+echo "==> Rebuilding nginx..."
+docker compose -f "$HOMELAB_DIR/docker-compose.yml" up -d --build nginx
+
+echo ""
 echo "================================================================"
 echo "  Site added: $SITE_NAME"
 echo "  Host:       $SITE_HOST -> $PI_IP"
 echo "  Files:      $SITE_DIR"
-echo ""
-echo "  Next: deploy files to $SITE_DIR, then:"
-echo "  cd $HOMELAB_DIR && docker compose up -d --build"
 echo "================================================================"
 echo ""
