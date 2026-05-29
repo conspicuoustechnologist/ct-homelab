@@ -5,5 +5,6 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+bash "$SCRIPT_DIR/restore_env.sh"
 bash "$SCRIPT_DIR/restore_pihole.sh"
 bash "$SCRIPT_DIR/restore_claude.sh"
