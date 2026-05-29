@@ -140,6 +140,7 @@ fi
 
 # 6. optionally clone a git repo into the site directory
 echo ""
+CLONED=0
 read -r -p "Clone a git repository into $SITE_DIR? [y/N] " CLONE_REPO
 if [[ "$CLONE_REPO" =~ ^[Yy]$ ]]; then
     read -r -p "Repository URL: " REPO_URL
@@ -148,19 +149,30 @@ if [[ "$CLONE_REPO" =~ ^[Yy]$ ]]; then
         REPO_URL=$(echo "$REPO_URL" | sed 's|https://github.com/|git@github.com:|' | sed 's|\.git/*$||').git
         git clone "$REPO_URL" "$SITE_DIR"
         echo "==> Cloned $REPO_URL into $SITE_DIR"
+        CLONED=1
     else
         echo "No URL provided, skipping."
     fi
 fi
 
 echo ""
-echo "==> Rebuilding nginx..."
-docker compose -f "$HOMELAB_DIR/docker-compose.yml" up -d --build nginx
-
-echo ""
-echo "================================================================"
-echo "  Site added: $SITE_NAME"
-echo "  Host:       $SITE_HOST -> $PI_IP"
-echo "  Files:      $SITE_DIR"
-echo "================================================================"
+if [ "$CLONED" -eq 1 ]; then
+    echo "==> Rebuilding nginx..."
+    docker compose -f "$HOMELAB_DIR/docker-compose.yml" up -d --build nginx
+    echo ""
+    echo "================================================================"
+    echo "  Site added: $SITE_NAME"
+    echo "  Host:       $SITE_HOST -> $PI_IP"
+    echo "  Files:      $SITE_DIR"
+    echo "================================================================"
+else
+    echo "================================================================"
+    echo "  Site added: $SITE_NAME"
+    echo "  Host:       $SITE_HOST -> $PI_IP"
+    echo "  Files:      $SITE_DIR"
+    echo ""
+    echo "  Deploy files to $SITE_DIR, then:"
+    echo "  cd $HOMELAB_DIR && docker compose up -d --build"
+    echo "================================================================"
+fi
 echo ""
