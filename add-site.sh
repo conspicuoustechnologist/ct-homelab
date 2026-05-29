@@ -33,6 +33,8 @@ if [ -z "$SITE_NAME" ] || [ -z "$SITE_HOST" ] || [ -z "$SITE_DIR" ]; then
     exit 1
 fi
 
+SITE_DIR="$(realpath -m "$SITE_DIR")"
+
 VAR_PREFIX="${SITE_NAME^^}"
 VAR_PREFIX="${VAR_PREFIX//-/_}"
 
