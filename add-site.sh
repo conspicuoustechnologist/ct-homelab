@@ -119,7 +119,7 @@ if [ -f "$LOCAL_DNS" ]; then
     if grep -q "$SITE_HOST" "$LOCAL_DNS"; then
         echo "==> DNS record for $SITE_HOST already exists, skipping"
     else
-        echo "address=/$SITE_HOST/$PI_IP" >> "$LOCAL_DNS"
+        echo "address=/$SITE_HOST/$PI_IP" | sudo tee -a "$LOCAL_DNS" > /dev/null
         echo "==> Added DNS record: $SITE_HOST -> $PI_IP"
         if docker ps --format '{{.Names}}' | grep -q '^pihole$'; then
             docker restart pihole > /dev/null
