@@ -35,16 +35,26 @@ if [ -z "$PIHOLE_WEBPASSWORD" ]; then
 fi
 
 echo ""
+PIHOLE_URL="http://localhost"
+PIHOLE_HEADER="Host: $PIHOLE_HOST"
+
 echo "==> Waiting for Pi-hole to be ready..."
+READY=0
 for i in $(seq 1 30); do
-    if curl -sf "http://$PIHOLE_HOST/api/auth" -o /dev/null 2>/dev/null; then
+    if curl -sf --max-time 3 -H "$PIHOLE_HEADER" "$PIHOLE_URL/api/auth" -o /dev/null 2>/dev/null; then
+        READY=1
         break
     fi
     sleep 2
 done
+if [ "$READY" = "0" ]; then
+    echo "    ERROR: Pi-hole did not become ready. Is the container running?"
+    exit 1
+fi
 
 echo "==> Restoring Pi-hole backup..."
-AUTH=$(curl -sf -X POST "http://$PIHOLE_HOST/api/auth" \
+AUTH=$(curl -sf -X POST "$PIHOLE_URL/api/auth" \
+    -H "$PIHOLE_HEADER" \
     -H "Content-Type: application/json" \
     -d "{\"password\":\"$PIHOLE_WEBPASSWORD\"}")
 SID=$(echo "$AUTH" | grep -o '"sid":"[^"]*"' | cut -d'"' -f4)
@@ -56,12 +66,14 @@ if [ -z "$SID" ]; then
 fi
 
 HTTP_STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
-    -X POST "http://$PIHOLE_HOST/api/teleporter" \
+    -X POST "$PIHOLE_URL/api/teleporter" \
+    -H "$PIHOLE_HEADER" \
     -b "sid=$SID" \
     -H "X-CSRF-TOKEN: $CSRF" \
     -F "file=@$PIHOLE_BACKUP")
 if [ "$HTTP_STATUS" != "200" ]; then
-    curl -s -X DELETE "http://$PIHOLE_HOST/api/auth" \
+    curl -s -X DELETE "$PIHOLE_URL/api/auth" \
+        -H "$PIHOLE_HEADER" \
         -b "sid=$SID" -H "X-CSRF-TOKEN: $CSRF" > /dev/null || true
     echo "    WARNING: Restore failed (HTTP $HTTP_STATUS)."
     exit 1
@@ -75,7 +87,8 @@ DNS_HOSTS=$(unzip -p "$PIHOLE_BACKUP" etc/dnsmasq.d/01-local-dns.conf 2>/dev/nul
     | paste -sd',' -)
 
 if [ -n "$DNS_HOSTS" ]; then
-    curl -s -X PUT "http://$PIHOLE_HOST/api/config" \
+    curl -s -X PUT "$PIHOLE_URL/api/config" \
+        -H "$PIHOLE_HEADER" \
         -b "sid=$SID" \
         -H "X-CSRF-TOKEN: $CSRF" \
         -H "Content-Type: application/json" \
@@ -85,7 +98,8 @@ else
     echo "    No local DNS records found in backup."
 fi
 
-curl -s -X DELETE "http://$PIHOLE_HOST/api/auth" \
+curl -s -X DELETE "$PIHOLE_URL/api/auth" \
+    -H "$PIHOLE_HEADER" \
     -b "sid=$SID" -H "X-CSRF-TOKEN: $CSRF" > /dev/null || true
 
 echo ""
