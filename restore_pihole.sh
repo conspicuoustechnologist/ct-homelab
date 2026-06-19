@@ -60,17 +60,36 @@ HTTP_STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
     -b "sid=$SID" \
     -H "X-CSRF-TOKEN: $CSRF" \
     -F "file=@$PIHOLE_BACKUP")
-curl -s -X DELETE "http://$PIHOLE_HOST/api/auth" \
-    -b "sid=$SID" \
-    -H "X-CSRF-TOKEN: $CSRF" > /dev/null || true
-
-if [ "$HTTP_STATUS" = "200" ]; then
-    echo ""
-    echo "================================================================"
-    echo "  Done. Pi-hole config restored from $PIHOLE_BACKUP"
-    echo "================================================================"
-    echo ""
-else
+if [ "$HTTP_STATUS" != "200" ]; then
+    curl -s -X DELETE "http://$PIHOLE_HOST/api/auth" \
+        -b "sid=$SID" -H "X-CSRF-TOKEN: $CSRF" > /dev/null || true
     echo "    WARNING: Restore failed (HTTP $HTTP_STATUS)."
     exit 1
 fi
+
+echo "==> Injecting local DNS records into Pi-hole config..."
+DNS_HOSTS=$(unzip -p "$PIHOLE_BACKUP" etc/dnsmasq.d/01-local-dns.conf 2>/dev/null \
+    | grep '^address=/' \
+    | sed 's|address=/\([^/]*\)/\(.*\)|"\2 \1"|' \
+    | sort -u \
+    | paste -sd',' -)
+
+if [ -n "$DNS_HOSTS" ]; then
+    curl -s -X PUT "http://$PIHOLE_HOST/api/config" \
+        -b "sid=$SID" \
+        -H "X-CSRF-TOKEN: $CSRF" \
+        -H "Content-Type: application/json" \
+        -d "{\"config\":{\"dns\":{\"hosts\":[$DNS_HOSTS]}}}" > /dev/null
+    echo "    DNS records restored to UI."
+else
+    echo "    No local DNS records found in backup."
+fi
+
+curl -s -X DELETE "http://$PIHOLE_HOST/api/auth" \
+    -b "sid=$SID" -H "X-CSRF-TOKEN: $CSRF" > /dev/null || true
+
+echo ""
+echo "================================================================"
+echo "  Done. Pi-hole config restored from $PIHOLE_BACKUP"
+echo "================================================================"
+echo ""
