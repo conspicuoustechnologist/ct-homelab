@@ -41,7 +41,7 @@ PIHOLE_HEADER="Host: $PIHOLE_HOST"
 echo "==> Waiting for Pi-hole to be ready..."
 READY=0
 for i in $(seq 1 30); do
-    if curl -sf --max-time 3 -H "$PIHOLE_HEADER" "$PIHOLE_URL/api/auth" -o /dev/null 2>/dev/null; then
+    if curl -s --max-time 3 -H "$PIHOLE_HEADER" "$PIHOLE_URL/api/auth" -o /dev/null 2>/dev/null; then
         READY=1
         break
     fi
