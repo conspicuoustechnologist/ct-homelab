@@ -87,7 +87,7 @@ DNS_HOSTS=$(unzip -p "$PIHOLE_BACKUP" etc/dnsmasq.d/01-local-dns.conf 2>/dev/nul
     | paste -sd',' -)
 
 if [ -n "$DNS_HOSTS" ]; then
-    curl -s -X PUT "$PIHOLE_URL/api/config" \
+    curl -s -X PATCH "$PIHOLE_URL/api/config" \
         -H "$PIHOLE_HEADER" \
         -b "sid=$SID" \
         -H "X-CSRF-TOKEN: $CSRF" \
